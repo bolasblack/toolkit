@@ -159,6 +159,15 @@
         decodeURIComponent result[1]
       else
         ""
+
+    parseQueryParam: (queryStr) ->
+      param = {}
+      querystring_parser = /(?:^|&|;)([^&=;]*)=?([^&;]*)/g
+      (queryStr or window.location.search)
+        .replace(/^\?/, "")
+        .replace querystring_parser, ($0, $1, $2) ->
+          param[$1] = $2 if $1
+      param
   # ]]]
 
   # [[[ stylesheets
