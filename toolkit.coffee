@@ -85,11 +85,11 @@
       v for k, v of obj
   # ]]]
 
-  # [[[ String
+  # [[[ string
   G.extend
     splTpl: (tpl, data) ->
       tpl.replace /{{(.*?)}}/igm, ($, $1) ->
-        if data[$1] then data[$1] else $
+        `data[$1] ? data[$1] : $`
 
     reEscape: (str) ->
       str.replace(/\\/g, "\\\\")
@@ -125,30 +125,10 @@
       [oldStr, newStr]
   # ]]]
 
-  # [[[ ajax
-  dumpFnDict = {} # 存储 dump 类函数，便于动态调用
+  # [[[ uri
   G.extend
-    arr2str: dumpFnDict.Array2str = (arr) ->
-      resultStr = "["
-      for v in arr
-        resultStr += "#{G.dump v},"
-      resultStr.slice(0, -1) + "]"
-
-    obj2str: dumpFnDict.Object2str = (obj) ->
-      resultStr = "{"
-      for k, v of obj
-        resultStr += "#{G.dump k}:#{G.dump v}," if G.has obj, k
-      resultStr.slice(0, -1) + "}"
-
-    dump: (obj) ->
-      dumpFnDict["String2str"] = (string) ->
-        if G.isString string then '"' + string + '"' else string
-      for type in ["Object", "Array", "String"]
-        return dumpFnDict["#{type}2str"] obj if G["is#{type}"] obj
-      obj
-
     param: (obj) ->
-      ("#{encodeURIComponent key}=#{encodeURIComponent G.dump value}" \
+      ("#{encodeURIComponent key}=#{encodeURIComponent JSON.stringify value}" \
         for key, value of obj).join "&"
 
     getParam: (url, key) ->
