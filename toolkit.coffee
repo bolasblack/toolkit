@@ -100,8 +100,8 @@
         .replace(/\{/g, "\\{").replace(/\}/g, "\\}")
         .replace(/\(/g, "\\(").replace(/\)/g, "\\)")
 
-    charUpperCase: (index, length=1) ->
-      strList = @split ''
+    charUpperCase: (str, index=0, length=1) ->
+      strList = str.split ''
       for i in [0...length]
         newIndex = index + i
         strList[newIndex] = strList[newIndex].toUpperCase()
