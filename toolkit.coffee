@@ -146,7 +146,7 @@
       (queryStr or window.location.search)
         .replace(/^\?/, "")
         .replace querystring_parser, ($0, $1, $2) ->
-          param[$1] = $2 if $1
+          param[$1] = decodeURIComponent $2 if $1
       param
   # ]]]
 
