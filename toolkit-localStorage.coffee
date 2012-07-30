@@ -46,7 +46,8 @@ window.G?.localStorage = ((window) ->
     storage[key] = value
   delLocalStorage = (key) ->
     storage = if useSession then ss else ls
-    delete storage[key]
+    # ie8 will throw error if storage[key] is undefined
+    delete storage[key] if storage[key]
 
   [setMethod, getMethod, delMethod] = if ls? then \
     [setLocalStorage, getLocalStorage, delLocalStorage] else \
