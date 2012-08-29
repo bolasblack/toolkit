@@ -60,7 +60,7 @@
     isElement: (obj) -> obj? and obj.nodeType is 1
     isFinite: (obj) -> @isNumber(obj) and isFinite obj
     isObject: (obj) -> obj is Object obj
-    isNaN: (obj) -> obj isnt obj
+    isNaN: (obj) -> if isNaN? then isNaN(obj) else obj isnt obj
     isNull: (obj) -> obj is null
     isUndefined: (obj) -> obj is undefined
     isEmpty: (obj) ->
@@ -85,6 +85,17 @@
       return slice.call obj if @isArguments obj
       return obj.toArray() if obj.toArray? and @isFunction obj.toArray
       v for k, v of obj
+  # ]]]
+
+  # [[[ number
+  G.extend
+    # TODO: 第三个参数，填充 0
+    toFixed: (number, length=1) ->
+      return if @isNaN (fnumber = parseFloat number)
+      return number.toFixed length if number.toFixed?
+      operator = 1
+      operator *= 10 for i in [0..length]
+      Math.round(fnumber * operator) / operator
   # ]]]
 
   # [[[ string
