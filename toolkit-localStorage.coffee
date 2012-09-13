@@ -31,8 +31,8 @@ window.G?.localStorage = ((window) ->
     document.cookie = cookieStr
 
   getCookie = (key) ->
-    re = new RegExp("\\??" + key + "=([^;]*)", "g")
-    if (result = re.exec document.cookie)? then unescape(result[1]) else null
+    re = new RegExp "(?:;\\s*|^)" + key + "=(.*?)(?:;|$)", "g"
+    if (result = re.exec document.cookie) then unescape result[1] else null
 
   delCookie = (key) ->
     cookieValue = getCookie key
