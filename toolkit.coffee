@@ -60,7 +60,8 @@
     isElement: (obj) -> obj? and obj.nodeType is 1
     isFinite: (obj) -> @isNumber(obj) and isFinite obj
     isObject: (obj) -> obj is Object obj
-    isNaN: (obj) -> if isNaN? then isNaN(obj) else obj isnt obj
+    # isNaN 会隐式地把参数变为 Number 再判断
+    isNaN: (obj) -> obj isnt obj
     isNull: (obj) -> obj is null
     isUndefined: (obj) -> obj is undefined
     isEmpty: (obj) ->
