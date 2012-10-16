@@ -1,4 +1,4 @@
-window.G?.localStorage = ((window) ->
+window.G?.localStorage = do (window) ->
   ls = window.localStorage
   ss = window.sessionStorage
   useCookie = false
@@ -96,5 +96,3 @@ window.G?.localStorage = ((window) ->
     return useCookie unless boolInput?
     useCookie = boolInput
     this
-
-) window

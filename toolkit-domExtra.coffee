@@ -1,5 +1,7 @@
-((window, G) ->
-  Events = ( ->
+do (window) ->
+  G = winodw.G
+
+  Events = do ->
     Events = {}
 
     get = (elem, eventName) ->
@@ -12,8 +14,7 @@
       Events[elem]["$#{eventName}"] or= []
       Events[elem]["$#{eventName}"].push callback
 
-    return {get, reg}
-  )()
+    {get, reg}
 
   w3cHandleRunner = (e, handler) ->
     keepBubble = handler? e
@@ -56,4 +57,3 @@
       elem
     
     listEvent: Events.get
-) window, window.G
