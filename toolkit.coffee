@@ -195,9 +195,10 @@
 
     setCSS: (elem, styleName, styleValue) ->
       elemStyle = elem.style
-      # TODO: 在 IE6 IE8 中测试
-      elemStyle.cssText = elemStyle.cssText.replace new RegExp("#{styleName}\s:.*;+\s", "g"), ""
-      elemStyle.cssText += "#{styleName}: #{styleValue};"
+      # 在 < ie9 中，css 属性名会大写
+      elemStyle.cssText = elemStyle.cssText.replace new RegExp("#{styleName}\s:.*;+\s", "gi"), ""
+      # 在 < ie9 中行末的 css 会被删除分号
+      elemStyle.cssText = elemStyle.cssText.replace /;?$/, ";#{styleName}: #{styleValue}"
       this
   # ]]]
 
