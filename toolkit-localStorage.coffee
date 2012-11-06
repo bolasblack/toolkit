@@ -25,13 +25,13 @@ window.G?.localStorage = do (window) ->
 
     outTime = getTime time
     cookieStr = "#{key}=#{escape value}"
-    currTime = (exp = new Date()).setTime exp.getTime() + outTime
+    currTime = (exp = new Date).setTime exp.getTime() + outTime
     cookieStr += ";expires=#{exp.toGMTString()}" unless useSession
     cookieStr += ";path=/"
     document.cookie = cookieStr
 
   getCookie = (key) ->
-    re = new RegExp "(?:;\\s*|^)" + key + "=(.*?)(?:;|$)", "g"
+    re = ///(?:;\s*|^)#{key}=(.*?)(?:;|$)///g
     if (result = re.exec document.cookie) then unescape result[1] else null
 
   delCookie = (key) ->
