@@ -44,7 +44,7 @@ do (window, document)->
   unless G.isArguments arguments
     G.isArguments = (obj) -> !!(obj and G.has obj, "callee")
   unless typeof (/./) is 'function'
-    G.isFunction = (obj) -> typeof obj === 'function'
+    G.isFunction = (obj) -> typeof obj is 'function'
 
   G.extend
     toType: (obj) -> if obj? then class2type[toString.call obj] or "object" else String obj

@@ -66,7 +66,7 @@ window.G?.localStorage = do (window) ->
   # ls.set k1, v1
   set: ->
     setMethod = setCookie if useCookie
-    if G.isObject arguments[0]
+    if G.isPlainObject arguments[0]
       setMethod key, value, storageTime for key, value of arguments[0]
     else
       [key, value] = arguments
