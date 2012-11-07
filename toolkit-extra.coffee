@@ -1,4 +1,20 @@
-do (window, G) ->
+((definition) ->
+  if typeof define is "function"
+    if define.amd
+      define ["toolkit"], (G) -> definition G
+    else if define.cmd
+      define (require, exports, module) ->
+        G = require "toolkit"
+        module.exports = definition G
+  else if exports?
+    G = require "./toolkit"
+    if module? and module.exports
+      module.exports = definition G
+    else
+      exports.G = definition G
+  else
+    definition @G
+) (G) ->
   # [[[ number
   G.extend
     # TODO: 第三个参数，填充 0
