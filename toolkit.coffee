@@ -24,7 +24,7 @@ do (window, document)->
     [target, i] = [this, i - 1] if length is i
     for i in [i...arguments.length]
       if (options = arguments[i])?
-        for name, copy of options when target is copy
+        for name, copy of options when target isnt copy
           src = target[name]
           if deep and copy and (@isPlainObject(copy) or (copyIsArray = @isArray copy))
             if copyIsArray
@@ -33,7 +33,7 @@ do (window, document)->
             else
               clone = src and if @isPlainObject src then src else {}
             target[name] = @extend deep, clone, copy
-          else unless @isUndefined copy
+          else if copy isnt undefined
             target[name] = copy
     target
 
