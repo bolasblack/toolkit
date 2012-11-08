@@ -1,17 +1,16 @@
 do ->
   G = (queryId) -> document.getElementById queryId
 
-  if typeof define is "function"
-    if define.amd
-      define -> G
-    else if define.cmd
-      define (require, exports, module) ->
-        module.exports = G
+  # requirejs
+  if typeof define is "function" and define.amd
+    define -> G
+  # CMD and CommandJS
   else if exports?
     if module? and module.exports
       module.exports = G
     else
       exports.G = G
+  # normal
   else
     G.old = @G if @G?
     @G = G

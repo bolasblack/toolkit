@@ -1,17 +1,21 @@
 ((definition) ->
-  if typeof define isnt "function"
-    definition @G
-  else if define.amd
+  # requirejs
+  if typeof define is "function" and define.amd
     define ["toolkit"], (G) ->
       G.localStorage = definition G
       G
-  else if define.cmd
-    define (require, exports, module) ->
-      G = require "toolkit"
-      G.localStorage = definition G
+  # CMD and CommandJS
+  else if exports?
+    G = require "./toolkit"
+    if module? and module.exports
       module.exports = G
+    else
+      exports.G = G
+  # normal
   else
-    definition @G
+    G = @G
+
+  G.localStorage = definition G
 ) (G) ->
     unless G.isWindow this
       throw new Error "it can only run in browser"

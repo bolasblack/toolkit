@@ -1,17 +1,15 @@
 ((definition) ->
-  if typeof define is "function"
-    if define.amd
-      define ["toolkit"], (G) -> definition G
-    else if define.cmd
-      define (require, exports, module) ->
-        G = require "toolkit"
-        module.exports = definition G
+  # requirejs
+  if typeof define is "function" and define.amd
+    define ["toolkit"], (G) -> definition G
+  # CMD and CommandJS
   else if exports?
     G = require "./toolkit"
     if module? and module.exports
       module.exports = definition G
     else
       exports.G = definition G
+  # normal
   else
     definition @G
 ) (G) ->
