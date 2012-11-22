@@ -17,9 +17,6 @@
 
   G.localStorage = definition G
 ) (G) ->
-    unless G.isWindow this
-      throw new Error "it can only run in browser"
-
     ls = @localStorage
     ss = @sessionStorage
     document = @document
@@ -45,7 +42,7 @@
           when "d" then timeCount * 24 * 60 * 60 * 1000
           else useSession = true
 
-      outTime = getTime time
+      outTime = if useSession then 0 else getTime time
       cookieStr = "#{key}=#{escape value}"
       currTime = (exp = new Date).setTime exp.getTime() + outTime
       cookieStr += ";expires=#{exp.toGMTString()}" unless useSession
