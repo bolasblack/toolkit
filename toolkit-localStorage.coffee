@@ -128,7 +128,7 @@
       doActionLoop delMethod, arguments
       this
 
-    # {a: {b: {c: {d: 1}
+    # {a: {b: {c: {d: 1}}}}
     # getObject "a", "b", "c"
     # => {d: 1}
     getObject: (keys...) ->
@@ -138,9 +138,9 @@
         result = object[key]
       result
 
-    # {a: {b: {c: {d: 1}
+    # {a: {b: {c: {d: 1}}}, b: 2}
     # setObject "a", "b", "c", "d", 2
-    # => {a: {b: {c: {d: 2}
+    # => {a: {b: {c: {d: 2}}}, b: 2}
     setObject: (keys..., value) ->
       originalKey = keys.shift()
       originalObject = @getObject originalKey
