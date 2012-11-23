@@ -138,9 +138,21 @@
         result = object[key]
       result
 
+    # {a: {b: {c: {d: 1}}}}
+    # getObject "a", "b", "c"
+    # = {a: {b: {c: {}}}}
+    delObject: (keys...) ->
+      originalKey = keys.shift()
+      originalObject = jsonSafeParse @get originalKey
+      return @del originalKey unless keys.length
+      intoObject originalObject, keys, (object, key) =>
+        delete object[key]
+        @set originalKey, JSON.stringify originalObject
+      this
+
     # {a: {b: {c: {d: 1}}}, b: 2}
     # setObject "a", "b", "c", "d", 2
-    # => {a: {b: {c: {d: 2}}}, b: 2}
+    # = {a: {b: {c: {d: 2}}}, b: 2}
     setObject: (keys..., value) ->
       originalKey = keys.shift()
       originalObject = @getObject originalKey
