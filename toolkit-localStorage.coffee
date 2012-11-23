@@ -24,6 +24,7 @@
     useSession = false
     storageTime = "30d"
 
+    # [[[ utils
     getInt = (str, hex=10) ->
       return 0 if str is ""
       parseInt str, hex
@@ -39,6 +40,32 @@
         else
           useSession = true
           0
+
+    jsonSafeParse = (str, defaultValue={}) ->
+      return defaultValue if not str? or str is ""
+      try
+        JSON.parse str
+      catch error
+        defaultValue
+
+    intoObject = (obj, keys, callback) ->
+      keys = keys.slice()
+      resultObj = obj
+      while keys.length > 1
+        path = keys.shift()
+        resultObj[path] = {} unless resultObj[path]?
+        resultObj = resultObj[path]
+      callback? resultObj, keys.shift()
+
+    doActionLoop = (actMethod, args) ->
+      realArgs = if G.isArray args[0] then args[0] else G.toArray args
+      return actMethod realArgs[0] if realArgs.length is 1
+      result = {}
+      for storageKey in realArgs
+        storageValue = actMethod storageKey
+        result[storageKey] = storageValue if storageValue?
+      result
+    # ]]]
 
     # [[[ cookie
     # s指秒，m指分钟，h指小时，d指天数
@@ -78,15 +105,6 @@
       [setLocalStorage, getLocalStorage, delLocalStorage] else \
       [setCookie, getCookie, delCookie]
 
-    doActionLoop = (actMethod, args) ->
-      realArgs = if G.isArray args[0] then args[0] else G.toArray args
-      return actMethod realArgs[0] if realArgs.length is 1
-      result = {}
-      for storageKey in realArgs
-        storageValue = actMethod storageKey
-        result[storageKey] = storageValue if storageValue?
-      result
-
     # ls.set {k1: v1, k2: v2, k3: v3}
     # ls.set k1, v1
     set: ->
@@ -110,28 +128,28 @@
       doActionLoop delMethod, arguments
       this
 
-    # same as @get()
-    getObject: ->
-      doActionLoop (key) =>
-        str = @get key
-        return null if not str? or str is ""
-        try
-          JSON.parse str
-        catch error
-          null
-      , arguments
+    # {a: {b: {c: {d: 1}
+    # getObject "a", "b", "c"
+    # => {d: 1}
+    getObject: (keys...) ->
+      result = originalObject = jsonSafeParse @get keys.shift()
+      return result unless keys.length
+      intoObject originalObject, keys, (object, key) ->
+        result = object[key]
+      result
 
     # {a: {b: {c: {d: 1}
     # setObject "a", "b", "c", "d", 2
+    # => {a: {b: {c: {d: 2}
     setObject: (keys..., value) ->
       originalKey = keys.shift()
-      object = originalObject = @getObject(originalKey) or {}
-      while keys.length > 1
-        path = keys.shift()
-        object[path] = {} unless object[path]?
-        object = object[path]
-      object[keys.shift()] = value
-      @set originalKey, JSON.stringify originalObject
+      originalObject = @getObject originalKey
+      intoObject originalObject, keys, (object, key) =>
+        if G.isPlainObject object
+          object[key] = value
+          @set originalKey, JSON.stringify originalObject
+        else
+          console.warn object + "is not a object"
       this
 
     storageTime: (time) ->
