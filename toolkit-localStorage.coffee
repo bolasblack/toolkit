@@ -28,21 +28,23 @@
       return 0 if str is ""
       parseInt str, hex
 
-    # s指秒，m指秒，h指小时，d指天数
+    parseTime = (str) ->
+      timeCount = getInt "#{str}".slice 0, -1
+      timeUnit = str.substr -1
+      switch timeUnit
+        when "s" then timeCount * 1000
+        when "m" then timeCount * 60 * 1000
+        when "h" then timeCount * 60 * 60 * 1000
+        when "d" then timeCount * 24 * 60 * 60 * 1000
+        else
+          useSession = true
+          0
+
+    # [[[ cookie
+    # s指秒，m指分钟，h指小时，d指天数
     # 如30d代表30天，setCookie "name","hayden","20s"
     setCookie = (key, value, time) ->
-      getTime = (str) ->
-        timeCount = getInt "#{str}".slice 0, -1
-        timeUnit = str.substr -1
-        useSession = false
-        switch timeUnit
-          when "s" then timeCount * 1000
-          when "m" then timeCount * 60 * 1000
-          when "h" then timeCount * 60 * 60 * 1000
-          when "d" then timeCount * 24 * 60 * 60 * 1000
-          else useSession = true
-
-      outTime = if useSession then 0 else getTime time
+      outTime = parseTime time
       cookieStr = "#{key}=#{escape value}"
       currTime = (exp = new Date).setTime exp.getTime() + outTime
       cookieStr += ";expires=#{exp.toGMTString()}" unless useSession
@@ -56,17 +58,21 @@
     delCookie = (key) ->
       cookieValue = getCookie key
       setCookie key, cookieValue, "-1d"
+    # ]]]
 
+    # [[[ localStorage
     getLocalStorage = (key) ->
       storage = if useSession then ss else ls
-      storage[key]
+      storage.getItem key
+
     setLocalStorage = (key, value) ->
       storage = if useSession then ss else ls
-      storage[key] = value
+      storage.setItem key, value
+
     delLocalStorage = (key) ->
       storage = if useSession then ss else ls
-      # ie8 will throw error if storage[key] is undefined
-      delete storage[key] if storage[key]
+      storage.removeItem key
+    # ]]]
 
     [setMethod, getMethod, delMethod] = if ls? then \
       [setLocalStorage, getLocalStorage, delLocalStorage] else \
@@ -98,17 +104,44 @@
       getMethod = getCookie if useCookie
       doActionLoop getMethod, arguments
 
-    # same as get()
+    # same as @get()
     del: ->
       delMethod = delCookie if useCookie
       doActionLoop delMethod, arguments
       this
 
+    # same as @get()
+    getObject: ->
+      doActionLoop (key) =>
+        str = @get key
+        return null if not str? or str is ""
+        try
+          JSON.parse str
+        catch error
+          null
+      , arguments
+
+    # {a: {b: {c: {d: 1}
+    # setObject "a", "b", "c", "d", 2
+    setObject: (keys..., value) ->
+      originalKey = keys.shift()
+      object = originalObject = @getObject(originalKey) or {}
+      while keys.length > 1
+        path = keys.shift()
+        object[path] = {} unless object[path]?
+        object = object[path]
+      object[keys.shift()] = value
+      @set originalKey, JSON.stringify originalObject
+      this
+
     storageTime: (time) ->
-      return `useSession = true, this` if getInt(time) in [0, NaN]
+      if getInt(time) in [0, NaN]
+        [storageTime, useSession] = [0, true]
+        return this
+
       time = "#{time}s" if G.isNumber time
-      return `useSession = false, this` if time.slice(-1) in ["s", "m", "h", "d"]
-      [storageTime, useSession] = [time, false]
+      if time.slice(-1) in ["s", "m", "h", "d"]
+        [storageTime, useSession] = [time, false]
       this
 
     useCookie: (boolInput) ->
