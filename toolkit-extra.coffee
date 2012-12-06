@@ -78,18 +78,17 @@
 
     getParam: (url, key) ->
       key = @reEscape key
-      re = new RegExp "\\??" + key + "=([^&]*)", "g"
+      re = ///\??#{key}=([^&]*)///g
       result = re.exec url
       if result? and result.length > 1
         decodeURIComponent result[1]
       else
         ""
 
-    parseQueryParam: (queryStr) ->
+    parseQueryParam: (queryStr=window.location.search) ->
       param = {}
-      querystring_parser = /(?:^|&|;)([^&=;]*)=?([^&;]*)/g
-      (queryStr or window.location.search)
-        .replace(/^\?/, "")
+      querystring_parser = /(?:^|&)([^&=]*)=?([^&]*)/g
+      queryStr.replace(/^\?/, "")
         .replace querystring_parser, ($0, $1, $2) ->
           param[$1] = decodeURIComponent $2 if $1
       param
