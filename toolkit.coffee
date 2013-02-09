@@ -37,8 +37,9 @@ do (window, document)->
             target[name] = copy
     target
 
-  class2type = {} # 用于 G.toType 函数, 根据对象的 toString 输出得到对象的类型
-  'Object Boolean Array Arguments Function String Number Date RegExp'.replace /[^, ]+/g, (typeName) ->
+  class2type = {} # 用于`G.toType`函数，根据对象的`toString`方法输出得到对象的类型
+  types = 'Boolean Arguments Function String Number Date RegExp'
+  types.replace /[^, ]+/g, (typeName) ->
     class2type["[object #{typeName}]"] = typeName.toLowerCase()
     G["is#{typeName}"] = (obj) -> toString.call(obj) is "[object #{typeName}]"
   unless G.isArguments arguments
@@ -52,10 +53,19 @@ do (window, document)->
     # from [jquery](http://jquery.com)
     isNode: (obj) -> obj.nodeType?
     isXMLDoc: (obj) ->
-      documentElement = elem and (elem.ownerDocument or elem).documentElement
+      documentElement = obj and (obj.ownerDocument or obj).documentElement
       if documentElement then documentElement.nodeName isnt "HTML" else false
     isWindow: (obj) -> obj? and obj is obj.window
     isElement: (obj) -> !!(obj and obj.nodeType is 1)
+    isPlainObject: (obj) -> #from jquery 1.8.3 pre
+      return false if !obj or @toType(obj) isnt "object" or @isNode(obj) or @isWindow(obj)
+      try
+        return false if obj.constructor and !@has(obj, "constructor") and !@has(obj.constructor::, "isPrototypeOf")
+      catch e
+        return false
+      key for key of obj
+      key is undefined or @has obj, key
+
     # from [underscore](https://github.com/documentcloud/underscore/)
     isFinite: (obj) -> isFinite(obj) and !isNaN parseFloat obj
     isObject: (obj) -> obj is Object obj
@@ -69,14 +79,6 @@ do (window, document)->
       return obj.length is 0 if @isArray(obj) or @isString obj
       (return false if @has obj, key) for key of obj
       true
-    isPlainObject: (obj) -> #from jquery 1.8.3 pre
-      return false if !obj or @toType(obj) isnt "object" or @isNode(obj) or @isWindow(obj)
-      try
-        return false if obj.constructor and !@has(obj, "constructor") and !@has(obj.constructor::, "isPrototypeOf")
-      catch e
-        return false
-      key for key of obj
-      key is undefined or @has obj, key
 
   G.extend
     has: (obj, attr) -> Object::hasOwnProperty.call obj, attr
