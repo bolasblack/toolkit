@@ -1,4 +1,18 @@
-do (window, G) ->
+((definition) ->
+  # requirejs
+  if typeof define is "function" and define.amd
+    define ["toolkit"], (G) -> definition G
+  # CMD and CommandJS
+  else if exports?
+    G = require "./toolkit"
+    if module? and module.exports
+      module.exports = definition G
+    else
+      exports.G = definition G
+  # normal
+  else
+    definition @G
+) (G) ->
   # [[[ number
   G.extend
     # TODO: 第三个参数，填充 0
@@ -64,21 +78,71 @@ do (window, G) ->
 
     getParam: (url, key) ->
       key = @reEscape key
-      re = new RegExp "\\??" + key + "=([^&]*)", "g"
+      re = ///\??#{key}=([^&]*)///g
       result = re.exec url
       if result? and result.length > 1
         decodeURIComponent result[1]
       else
         ""
 
-    parseQueryParam: (queryStr) ->
+    parseQueryParam: (queryStr=window.location.search) ->
       param = {}
-      querystring_parser = /(?:^|&|;)([^&=;]*)=?([^&;]*)/g
-      (queryStr or window.location.search)
-        .replace(/^\?/, "")
+      querystring_parser = /(?:^|&)([^&=]*)=?([^&]*)/g
+      queryStr.replace(/^\?/, "")
         .replace querystring_parser, ($0, $1, $2) ->
           param[$1] = decodeURIComponent $2 if $1
       param
+  # ]]]
+
+  # [[[ header
+  tokenexp = /[^\(\)<>@,;:"\/\[\]\?={} \t]+/
+  paramexp = ///#{tokenexp.source}=((#{tokenexp.source})|("[^"]*"))///g
+  linkexp = ///<[^>]*>\s*(\s*;\s*#{paramexp.source})*(,|$)///g
+  # TODO: add link header parser
+  #$.get("https://api.github.com/users/bolasblack/repos?page=2&per_page=1").success (data, textStatus, jqXHR) ->
+    #console.log G.parseLinkHeader jqXHR.getResponseHeader("Link")
+  #G.extend
+    # http://www.w3.org/Protocols/9707-link-header.html
+    # http://developer.github.com/v3/#pagination
+    # http://developer.github.com/v3/#json-p-callbacks
+    # Test String:
+    #   <https://api.github.com/users/bolasblack/repos?page=3&per_page=1>; rel="next", <https://api.github.com/users/bolasblack/repos?page=27&per_page=1>; rel="last", <https://api.github.com/users/bolasblack/repos?page=1&per_page=1>; rel="first", <https://api.github.com/users/bolasblack/repos?page=1&per_page=1>; rel="prev"
+    #parseLinkHeader: (linkHeader) ->
+      #linkMatchs = linkHeader.match linkexp
+      #for linkMatch in linkMatchs
+        #link = linkexp.exec linkMatch
+
+      #result = []
+      #sgmlNameRE = "[\\w\\d\\.\\-]+?"
+      #linkParamRE = ///;\s*(#{sgmlNameRE})="(#{sgmlNameRE})"///g
+      #parser = /<([^>]+?)>;\s*([\w\d\.\-]+?)="([\w\d\.\-]+?)",?\s*/g
+      #linkHeader.replace parser, ($0, $1, $2) ->
+        #result.push [$0, ]
+        #result[$2] = $1
+      #result
+
+      # from http://bill.burkecentral.com/2009/10/15/parsing-link-headers-with-javascript-and-java/
+      #parseLinkHeader = (value) ->
+        #matches = value.match(linkexp)
+        #rels = {}
+        #titles = {}
+        #for match in matches
+          #split = match.split('>')
+          #href = split[0].substring(1)
+          #ps = split[1]
+          #link = {}
+          #link.href = href
+          #s = ps.match(paramexp)
+          #for p in s
+            #paramsplit = p.split('=')
+            #name = paramsplit[0]
+            #link[name] = unquote(paramsplit[1])
+
+          #if link.rel
+            #rels[link.rel] = link
+          #if link.title
+            #titles[link.title] = link
+        #{rels, titles}
   # ]]]
 
   # [[[ stylesheets

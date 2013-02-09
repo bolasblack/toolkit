@@ -1,12 +1,19 @@
-do (window, document)->
+do ->
   G = (queryId) -> document.getElementById queryId
-  G.t = (tagName) -> document.getElementsByTagName tagName
 
-  if window["define"]?
-    define (require, exports, module) -> G
+  # requirejs
+  if typeof define is "function" and define.amd
+    define -> G
+  # CMD and CommandJS
+  else if exports?
+    if module? and module.exports
+      module.exports = G
+    else
+      exports.G = G
+  # normal
   else
-    G.old = window.G if window.G?
-    window.G = G
+    G.old = @G if @G?
+    @G = G
 
   slice = Array::slice
   toString = Object::toString
