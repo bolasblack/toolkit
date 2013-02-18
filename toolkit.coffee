@@ -55,8 +55,15 @@ do ->
     G.isFunction = (obj) -> typeof obj is 'function'
 
   G.extend
+    has: (obj, attr) -> Object::hasOwnProperty.call obj, attr
     toType: (obj) -> if obj? then class2type[toString.call obj] or "object" else String obj
+    toArray: (obj) -> # form underscore
+      return [] unless obj
+      return obj.toArray() if obj.toArray? and @isFunction obj.toArray
+      return slice.call(obj) if obj.length is obj.length
+      v for k, v of obj
 
+  G.extend
     # from [jquery](http://jquery.com)
     isNode: (obj) -> obj.nodeType?
     isXMLDoc: (obj) ->
@@ -64,12 +71,29 @@ do ->
       if documentElement then documentElement.nodeName isnt "HTML" else false
     isWindow: (obj) -> obj? and obj is obj.window
     isElement: (obj) -> !!(obj and obj.nodeType is 1)
-    isPlainObject: (obj) -> #from jquery 1.8.3 pre
-      return false if !obj or @toType(obj) isnt "object" or @isNode(obj) or @isWindow(obj)
+
+    isEmptyObject: (obj) ->
+      return false for key of obj
+      true
+
+    isPlainObject: (obj) ->
+      # Must be an Object.
+      # Because of IE, we also have to check the presence of the constructor property.
+      # Make sure that DOM nodes and window objects don't pass through, as well
+      return false if !obj \
+        or @toType(obj) isnt "object" \
+        or @isNode(obj) \
+        or @isWindow(obj)
+
       try
-        return false if obj.constructor and !@has(obj, "constructor") and !@has(obj.constructor::, "isPrototypeOf")
+        # Not own constructor property must be Object
+        return false if obj.constructor \
+          and !@has(obj, "constructor") \
+          and !@has(obj.constructor::, "isPrototypeOf")
       catch e
+        # IE8,9 Will throw exceptions on certain host objects #9897
         return false
+
       key for key of obj
       key is undefined or @has obj, key
 
@@ -84,13 +108,4 @@ do ->
     isEmpty: (obj) ->
       return true unless obj?
       return obj.length is 0 if @isArray(obj) or @isString obj
-      (return false if @has obj, key) for key of obj
-      true
-
-  G.extend
-    has: (obj, attr) -> Object::hasOwnProperty.call obj, attr
-    toArray: (obj) -> #form underscore
-      return [] unless obj
-      return obj.toArray() if obj.toArray? and @isFunction obj.toArray
-      return slice.call(obj) if obj.length is obj.length
-      v for k, v of obj
+      @isEmptyObject obj
