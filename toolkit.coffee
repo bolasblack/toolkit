@@ -18,30 +18,48 @@ do ->
   slice = Array::slice
   toString = Object::toString
 
-  G.extend = -> #form jquery 1.8.3 pre
+  G.extend = ->
+    # form jquery 1.9.2 pre
     target = arguments[0] or {}
     length = arguments.length
     deep = false
     i = 1
+
+    # Handle a deep copy situation
     if @isBoolean target
       deep = target
-      target = arguments[1]
+      target = arguments[1] or {}
+      # skip the boolean and the target
       i = 2
-    target = {} unless typeof target is "object" and @isFunction target
+
+    # Handle case when target is a string or something (possible in deep copy)
+    target = {} unless typeof target is "object" or @isFunction target
+
+    # extend itself if only one argument is passed
     [target, i] = [this, i - 1] if length is i
-    for i in [i...arguments.length]
-      if (options = arguments[i])?
-        for name, copy of options when target isnt copy
-          src = target[name]
-          if deep and copy and (@isPlainObject(copy) or (copyIsArray = @isArray copy))
-            if copyIsArray
-              copyIsArray = false
-              clone = src and if @isArray src then src else []
-            else
-              clone = src and if @isPlainObject src then src else {}
-            target[name] = @extend deep, clone, copy
-          else if copy isnt undefined
-            target[name] = copy
+
+    # Only deal with non-null/undefined values
+    for i in [i...arguments.length] when (options = arguments[i])?
+      # Extend the base object
+      for name, copy of options when target isnt copy
+        src = target[name]
+
+        # Recurse if we're merging plain objects or arrays
+        if deep and copy and (@isPlainObject(copy) or (copyIsArray = @isArray copy))
+          if copyIsArray
+            copyIsArray = false
+            clone = src and if @isArray src then src else []
+          else
+            clone = src and if @isPlainObject src then src else {}
+
+          # Never move original objects, clone them
+          target[name] = @extend deep, clone, copy
+
+        # Don't bring in undefined values
+        else if copy isnt undefined
+          target[name] = copy
+
+    # Return the modified object
     target
 
   class2type = {} # 用于`G.toType`函数，根据对象的`toString`方法输出得到对象的类型
