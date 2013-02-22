@@ -33,7 +33,7 @@ do ->
       i = 2
 
     # Handle case when target is a string or something (possible in deep copy)
-    target = {} unless typeof target is "object" or @isFunction target
+    target = {} if typeof target isnt "object" and not @isFunction target
 
     # extend itself if only one argument is passed
     [target, i] = [this, i - 1] if length is i
@@ -48,9 +48,9 @@ do ->
         if deep and copy and (@isPlainObject(copy) or (copyIsArray = @isArray copy))
           if copyIsArray
             copyIsArray = false
-            clone = src and if @isArray src then src else []
+            clone = if src and @isArray(src) then src else []
           else
-            clone = src and if @isPlainObject src then src else {}
+            clone = if src and @isPlainObject(src) then src else {}
 
           # Never move original objects, clone them
           target[name] = @extend deep, clone, copy
