@@ -33,6 +33,16 @@
       return data.map((partData) => @stpl tpl, partData).join "" if @isArray data
       tpl.replace /{{(.*?)}}/igm, ($, $1) -> `data[$1] ? data[$1] : $`
 
+    htmlEncode: (string) ->
+      elem = document.createElement "div"
+      elem.innerText = string
+      if elem.childNodes.length is 0 then "" else elem.innerHTML
+
+    htmlDecode: (string) ->
+      elem = document.createElement "div"
+      elem.innerHTML = string
+      if elem.childNodes.length is 0 then "" else elem.innerText
+
     reEscape: (str, skipChar=[]) ->
       reSpecialChar = [
         "\\", "/", ",", "."
