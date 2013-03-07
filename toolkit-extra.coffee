@@ -33,6 +33,14 @@
       return data.map((partData) => @stpl tpl, partData).join "" if @isArray data
       tpl.replace /{{(.*?)}}/igm, ($, $1) -> `data[$1] ? data[$1] : $`
 
+    #
+    # Escape/Unescape HTML entities in Javascript
+    # http://www.w3.org/TR/html4/sgml/entities.html
+    #
+    # The professional solution: http://www.strictly-software.com/htmlencode
+    #
+    # thx http://stackoverflow.com/a/1912522
+    #
     htmlEncode: (string) ->
       elem = document.createElement "div"
       elem.innerText = string
