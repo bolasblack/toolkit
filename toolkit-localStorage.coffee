@@ -52,9 +52,7 @@
       keys = keys.slice()
       resultObj = obj
       while keys.length > 1
-        path = keys.shift()
-        resultObj[path] = {} unless resultObj[path]?
-        resultObj = resultObj[path]
+        resultObj = (resultObj[keys.shift()] ?= {})
       callback? resultObj, keys.shift()
 
     doActionLoop = (actMethod, args) ->
@@ -110,9 +108,12 @@
     set: ->
       setMethod = setCookie if useCookie
       if G.isPlainObject arguments[0]
-        setMethod key, value, storageTime for key, value of arguments[0]
+        for key, value of arguments[0]
+          value = JSON.stringify(value) if G.isObject value
+          setMethod key, value, storageTime
       else
         [key, value] = arguments
+        value = JSON.stringify(value) if G.isObject value
         setMethod key, value, storageTime if key? and value?
       this
 
@@ -155,6 +156,7 @@
     # = {a: {b: {c: {d: 2}}}, b: 2}
     setObject: (keys..., value) ->
       originalKey = keys.shift()
+      return @set originalKey, value unless keys.length
       originalObject = @getObject originalKey
       intoObject originalObject, keys, (object, key) =>
         if G.isPlainObject object
