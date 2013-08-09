@@ -166,19 +166,7 @@
           console.warn object + "is not a object"
       this
 
-    # It will be global if only pass in time.
-    #
-    # If call `storageTime` with worker, like this:
-    #   G.storageTime(0, function() {
-    #     // some code
-    #   })
-    # The time will only work in callback function.
-    #
-    # **The time setting not work in async worker.**
-    storageTime: (time, worker) ->
-      if G.isFunction worker
-        oldSetting = [storageTime, useSession]
-
+    storageTime: (time) ->
       if getInt(time) in [0, NaN]
         [storageTime, useSession] = [0, true]
       else
@@ -186,13 +174,19 @@
         if time.slice(-1) in ["s", "m", "h", "d"]
           [storageTime, useSession] = [time, false]
 
-      if G.isFunction worker
-        worker G
-        [storageTime, useSession] = oldSetting
-
       this
 
     useCookie: (boolInput) ->
       return useCookie unless boolInput?
       useCookie = boolInput
+      this
+
+    # The options will only work in workers
+    # **The options not work in async worker.**
+    scope: (options, workers...) ->
+      old = {storageTime, useCookie}
+      @useCookie options.useCookie ? old.useCookie
+      @storageTime options.storageTime ? old.storageTime
+      worker(G.localStorage) for worker in workers
+      @useCookie(old.useCookie).storageTime old.storageTime
       this
