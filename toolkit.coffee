@@ -115,6 +115,13 @@ do ->
       key for key of obj
       key is undefined or @has obj, key
 
+    # port of Python `str.isdigit`
+    isDigit: (obj) ->
+      return unless obj
+      obj = obj.toString()
+      obj = obj.slice(1) if obj.charAt(0) is '-'
+      /^\d+$/.test obj
+
     # from [underscore](https://github.com/documentcloud/underscore/)
     isFinite: (obj) -> isFinite(obj) and !isNaN parseFloat obj
     isObject: (obj) -> obj is Object obj
