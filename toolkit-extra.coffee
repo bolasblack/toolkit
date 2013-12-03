@@ -31,7 +31,7 @@
       return tpl unless data?
       return @stpl tpl["innerHtml"], data if @isElement tpl
       return data.map((partData) => @stpl tpl, partData).join "" if @isArray data
-      tpl.replace /{{(.*?)}}/igm, ($, $1) -> `data[$1] ? data[$1] : $`
+      tpl.replace /{{(.*?)}}/igm, ($, $1) -> if data[$1]? then data[$1] else $
 
     #
     # Escape/Unescape HTML entities in Javascript

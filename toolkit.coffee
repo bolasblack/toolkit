@@ -134,3 +134,4 @@ do ->
       return true unless obj?
       return obj.length is 0 if @isArray(obj) or @isString obj
       @isEmptyObject obj
+
