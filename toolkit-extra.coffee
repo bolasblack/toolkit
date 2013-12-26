@@ -29,8 +29,8 @@
     stpl: (tpl, data) ->
       return unless tpl?
       return tpl unless data?
-      return @stpl tpl["innerHtml"], data if @isElement tpl
-      return data.map((partData) => @stpl tpl, partData).join "" if @isArray data
+      return @stpl tpl.innerHtml, data if @isElement tpl
+      return (@stpl(tpl, partData) for partData in data).join "" if @isArray data
       tpl.replace /{{(.*?)}}/igm, ($, $1) -> if data[$1]? then data[$1] else $
 
     #
